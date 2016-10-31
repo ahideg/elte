@@ -1,8 +1,11 @@
 package net.ic4fre.nytr.hf1;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Optional;
+import java.lang.reflect.ParameterizedType;
 
 
 interface Immutable {}
@@ -146,19 +149,31 @@ class LetDefinition <L extends Type, R extends Type> extends Expression<L> {
   }  
 }
 
+
 class Variable<T extends Type> extends Expression<T> {  
-  final String name;
+  private final String name;
+  private final Class<T> kind;
   
-  Variable(final String n) {
+  Variable(final String n, final Class<T> k) {
     name = n;
+    kind = k;
   }
   
   String getName() {
     return name;
   }
   
+  Class<T> getKind() {   
+    return kind;
+  }
+  
   Variable<T> klone() {
-    return new Variable<>(getName());
+    return new Variable<>(getName(), kind);
+  }
+  
+  @Override
+  public int hashCode() {
+    return name.hashCode();
   }
 }
 

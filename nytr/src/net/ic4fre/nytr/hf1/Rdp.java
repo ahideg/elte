@@ -155,9 +155,9 @@ class Rdp {
           error(2220);
         }
         if("Int".equals(es)) {
-          context.add(new Variable<Int>(varName));  
+          context.add(new Variable<Int>(varName, Int.class));  
         } else {
-          context.add(new Variable<Str>(varName));
+          context.add(new Variable<Str>(varName, Str.class));
         }
         ne = nextEvent();
       }

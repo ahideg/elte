@@ -10,9 +10,17 @@ public class Cases {
       //caseInputStream();
       //caseJsonStreaming();
       caseRdp();
+      //caseTypes();
     } catch(Exception e) {
       e.printStackTrace();
     }
+  }
+  
+  static void caseTypes() {
+    echo("--- caseTypes()");
+        
+    Variable<Int> v = new Variable<>("x", Int.class);
+    echo(v.getKind());
   }
   
   static void caseRdp() throws Exception {
@@ -20,7 +28,6 @@ public class Cases {
     
     final Rdp rdp = new Rdp();
     final Rdp.ParsedResult r = rdp.parse(System.in);
-    echo(r.getType());
   }
   
   static void caseInputStream() throws Exception {
@@ -33,7 +40,7 @@ public class Cases {
   }
   
   static void caseJsonStreaming() throws Exception {
-    echo("--- caseInputStream()");
+    echo("--- caseJsonStreaming()");
     
     final JsonParser jsonParser = Json.createParser(System.in);
     while(jsonParser.hasNext()) {
