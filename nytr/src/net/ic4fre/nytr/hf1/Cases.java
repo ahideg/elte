@@ -19,7 +19,8 @@ public class Cases {
     echo("--- caseRdp()");
     
     final Rdp rdp = new Rdp();
-    rdp.parse(System.in);
+    final Rdp.ParsedResult r = rdp.parse(System.in);
+    echo(r.getType());
   }
   
   static void caseInputStream() throws Exception {

@@ -8,7 +8,7 @@ class Rdp {
   private JsonParser jsonParser;
   private Context context;
   private Expression expression;
-  private Type type;
+  private Class<? extends Type> type;
   
   private JsonParser.Event nextEvent() {
     return jsonParser.next();
@@ -55,9 +55,9 @@ class Rdp {
     if(nextEvent()==JsonParser.Event.KEY_NAME && "ty".equals(eventString())) {
       if(nextEvent()==JsonParser.Event.VALUE_STRING) {
         if("Int".equals(eventString())) {
-          type = Type.Int;
+          type = Int.class;
         } else if("Str".equals(eventString())) {
-          type = Type.Str;
+          type = Str.class;
         } else {
           error(5607);
         }
@@ -80,19 +80,11 @@ class Rdp {
         break;
       case START_ARRAY :
         if("Add".equals(opval)) {
-          final Addition add = new Addition();
-          add.setLeftOperand(inputExp(nextEvent()));
-          add.setRightOperand(inputExp(nextEvent()));
-          expression = add;
+          expression = new Addition(inputExp(nextEvent()), inputExp(nextEvent()));
         } else if("Sub".equals(opval)) {
-          final Subtraction sub = new Subtraction();
-          sub.setLeftOperand(inputExp(nextEvent()));
-          sub.setRightOperand(inputExp(nextEvent()));
-          expression = sub;
+          expression = new Subtraction(inputExp(nextEvent()), inputExp(nextEvent()));
         } else if("Cat".equals(opval)) {
-          final Concatenation cat = new Concatenation();
-          cat.setLeftOperand(inputExp(nextEvent()));
-          cat.setRightOperand(inputExp(nextEvent()));
+          expression = new Concatenation(inputExp(nextEvent()), inputExp(nextEvent()));
         } else if("Let".equals(opval)) {
           final Expression l = inputExp(nextEvent());
           if(nextEvent()!=JsonParser.Event.VALUE_STRING) {
@@ -100,7 +92,7 @@ class Rdp {
           }
           final String varname = eventString();
           final Expression r = inputExp(nextEvent());
-          expression = new LetDefinition(l, context.findByName(varname), r);
+          expression = new LetDefinition(l, context.findVariableByName(varname).get(), r);
         } else {
           error(2217);
         }
@@ -112,13 +104,13 @@ class Rdp {
         if(!"IntLit".equals(opval)) {
           error(1217);
         }
-        expression = new IntLiteral(eventInteger());
+        expression = new IntLiteral(new Int(eventInteger()));
         break;
       case VALUE_STRING :
         if("Var".equals(opval)) {
-          expression = context.findByName(eventString());
+          expression = context.findVariableByName(eventString()).get();
         } else if("StrLit".equals(opval)) {
-          expression = new StringLiteral(eventString());
+          expression = new StringLiteral(new Str(eventString()));
         } else {
           error(5617);
         }
@@ -142,7 +134,7 @@ class Rdp {
             }
             error(7633);
           }
-          error(7652);
+          error(1652);
         }
         error(4512);
       }
@@ -162,7 +154,11 @@ class Rdp {
         if(ne!=JsonParser.Event.VALUE_STRING || (!"Int".equals(es) && !"Str".equals(es)) ) {
           error(2220);
         }
-        context.add(new Variable(varName, "Int".equals(es) ? Type.Int : Type.Str));
+        if("Int".equals(es)) {
+          context.add(new Variable<Int>(varName));  
+        } else {
+          context.add(new Variable<Str>(varName));
+        }
         ne = nextEvent();
       }
       if(ne==JsonParser.Event.END_OBJECT) {
@@ -173,12 +169,12 @@ class Rdp {
     error(9856);
   }
   
-  class ParsedResult {
+  static class ParsedResult {
     final Context context;
     final Expression expression;
-    final Type type;
+    final Class<? extends Type> type;
     
-    ParsedResult(final Expression a, final Context c, final Type t) {
+    ParsedResult(final Expression a, final Context c, final Class<? extends Type> t) {
       context = c;
       expression = a;
       type = t;
@@ -188,7 +184,7 @@ class Rdp {
       return context;
     }
     
-    Type getType() {
+    Class<? extends Type> getType() {
       return type;
     }
     
