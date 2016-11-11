@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Optional;
-import java.lang.reflect.ParameterizedType;
 
 
 interface Immutable {}
@@ -148,7 +147,6 @@ class LetDefinition <L extends Type, R extends Type> extends Expression<L> {
     return boundVariable;
   }  
 }
-
 
 class Variable<T extends Type> extends Expression<T> {  
   private final String name;
