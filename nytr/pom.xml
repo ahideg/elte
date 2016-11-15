@@ -45,6 +45,14 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+       
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>net.ic4fre.nytr.hf1.Main</mainClass>
+        </configuration>
+      </plugin>       
     </plugins>
     
     <resources>
