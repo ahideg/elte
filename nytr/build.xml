@@ -5,10 +5,12 @@
   <target name="help">
     <echo> 
     Az Ant task-ek:  
-        clean                   
-        build                   
-        dist
-        test
+        clean  kitorol minden generalt .class es .jar allomanyt                 
+        build  leforditja a Java forrast                 
+        dist   elkesziti a futtathato .jar-t
+        test   leforditja, jar-ositja es nehany tesztadattal lefuttatja a progit
+        run    lefuttatja a progit, ha van futtathato jar
+        full   leforditja, jar-ositja es lefuttatja a progit
     </echo>
   </target>
 
@@ -53,6 +55,27 @@
       depends="dist">
     <java classname="${prj.classpath.prefix}.Cases"
         input="${test.dir}/proper_input_2.json">
+      <classpath>
+        <pathelement location="${dist.dir}/${dist.jar}"/>
+        <pathelement location="${lib.dir}/javax.json-1.0.4.jar"/>
+      </classpath>  
+    </java>        
+  </target> 
+  
+  <target name="run">
+    <java classname="${prj.classpath.prefix}.Main"
+        spawn="false">
+      <classpath>
+        <pathelement location="${dist.dir}/${dist.jar}"/>
+        <pathelement location="${lib.dir}/javax.json-1.0.4.jar"/>
+      </classpath>  
+    </java>        
+  </target>   
+  
+  <target name="full"
+      depends="dist">
+    <java classname="${prj.classpath.prefix}.Main"
+        spawn="false">
       <classpath>
         <pathelement location="${dist.dir}/${dist.jar}"/>
         <pathelement location="${lib.dir}/javax.json-1.0.4.jar"/>
