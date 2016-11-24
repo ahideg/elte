@@ -19,14 +19,7 @@
       <artifactId>javax.json</artifactId>
       <version>1.0.4</version>
     </dependency>
-    
-    <!--dependency>
-      <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
-      <version>1.0.4</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}${file.separator}lib${file.separator}javax.json-1.0.4.jar</systemPath>
-    </dependency-->  
+ 
   </dependencies>
   
   <build>
@@ -49,8 +42,9 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
+        <version>1.5.0</version>
         <configuration>
-          <mainClass>net.ic4fre.nytr.hf1.Main</mainClass>
+          <mainClass>net.ic4fre.nytr.hf1.Main</mainClass>           
         </configuration>
       </plugin>       
     </plugins>

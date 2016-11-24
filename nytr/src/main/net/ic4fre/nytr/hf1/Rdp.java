@@ -140,6 +140,8 @@ class Rdp {
       }
       error(2388);
     }
+    System.out.println(ne.toString());
+    System.out.println(eventString());
     error(3328);
     return null;
   }

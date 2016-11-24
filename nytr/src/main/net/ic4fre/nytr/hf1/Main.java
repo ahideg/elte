@@ -7,7 +7,7 @@ public class Main {
       final Rdp.ParsedResult r = rdp.parse(System.in);
       System.out.println("YES");
     } catch(Exception e) {
-      //e.printStackTrace();
+      e.printStackTrace();
       System.out.println("NO");
     }
   }

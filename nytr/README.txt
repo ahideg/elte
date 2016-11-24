@@ -18,12 +18,14 @@
 
       erre lefordul
   
-    echo {\"con\": {\"x\":\"Str\"}, \"exp\": {\"op\":\"Var\",\"args\":\"x\"}, \"ty\": \"Str\"} | mvn exec:java
+    echo { \"con\": { \"x\":\"Str\"}, \"exp\": { \"op\":\"Var\",\"args\":\"x\"}, \"ty\": \"Str\"} | mvn exec:java
     
       Erre parse-olja az inputot Windows shellben.
       Figyelem, a double quotation mark (") karaktereket escape-elni kell backslash-sel,
       es lehet, hogy az mvn parancsot absolute path-tel kell meghivni.
       A JSON parser library-t a Maven online keresi meg, nem lokalban.
+      Nagyon fontos, hogy a command line inputban windowson a curly bracket ({) es a double quote (") koze 
+      MINDIG KELL EGY SPACE, kulonben a program nem kepes parse-olni a JSON-t.      
 
 
   (2) Ha (1) valamiert nem mukodik, akkor Ant-tal (1.9.4 vagy magasabb verzio)
@@ -32,11 +34,13 @@
       
       ez leteszteli hogy OK -e a forditas es a program
       
-    echo {\"con\": {\"x\":\"Str\"}, \"exp\": {\"op\":\"Var\",\"args\":\"x\"}, \"ty\": \"Str\"} | ant run
+    echo { \"con\": { \"x\":\"Str\"}, \"exp\": { \"op\":\"Var\",\"args\":\"x\"}, \"ty\": \"Str\"} | ant run
        
       Ez lefuttatja a parsert a standard input bemenettel.
-      figyelem, a double quotation mark (") karaktereket escape-elni kell backslash-sel,
+      Figyelem, a double quotation mark (") karaktereket escape-elni kell backslash-sel,
       es lehet, hogy az ant parancsot absolute path-tel kell meghivni.
+      Nagyon fontos, hogy a command line inputban windowson a curly bracket ({) es az 
+      escaped double quote (\") koze MINDIG KELL EGY SPACE, kulonben a program nem kepes parse-olni a JSON-t.
     
   
   (3) Ha (1) es (2) nem mukodnek
