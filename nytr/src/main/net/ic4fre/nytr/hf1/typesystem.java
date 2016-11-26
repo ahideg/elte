@@ -173,6 +173,11 @@ class Variable<T extends Type> extends Expression<T> {
   public int hashCode() {
     return name.hashCode();
   }
+  
+  @Override
+  public String toString() {
+    return "variable " + getName() + "  kind: " + getKind().toString();
+  }
 }
 
 class Context {

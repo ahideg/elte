@@ -15,9 +15,9 @@
 	},
 	"exp" : {
 		"op" : "Var",
-		"args" : "x"
+		"args" : "y"
 	},
-	"ty" : "Str"
+	"ty" : "Str1"
 }
 
     {

@@ -1,6 +1,7 @@
 package net.ic4fre.nytr.hf1;
 
 import java.io.InputStream;
+import java.util.List;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
@@ -27,7 +28,8 @@ public class Cases {
     echo("--- caseRdp()");
     
     final Rdp rdp = new Rdp();
-    final Rdp.ParsedResult r = rdp.parse(System.in);
+    final List<Rdp.ParsedResult> results = rdp.parse(System.in);
+    results.stream().forEach(e -> System.out.println(e.success()));
   }
   
   static void caseInputStream() throws Exception {

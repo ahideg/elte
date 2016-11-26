@@ -1,6 +1,12 @@
 package net.ic4fre.nytr.hf1;
 
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.ArrayList;
+import java.util.function.Function;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
@@ -9,7 +15,32 @@ class Rdp {
   private Context context;
   private Expression expression;
   private Class<? extends Type> type;
+  private boolean success;
   
+  private List<InputStream> splitInput(final InputStream inputStream) throws Exception {
+    final List<InputStream> inputStreamList = new ArrayList<>();
+    int bread = 0;
+    int bracketDiff = 0;
+    List<Byte> byteList = new ArrayList<>();
+    while((bread = inputStream.read())!=-1) {
+      byteList.add((byte)bread);
+      if(bread==123) {
+        bracketDiff++;
+      } else if(bread==125 && --bracketDiff==0) {
+        final byte[] ba = new byte[byteList.size()];
+        for(int i=0; i<byteList.size(); i++) {
+          ba[i] = byteList.get(i);
+        }
+        inputStreamList.add(new ByteArrayInputStream(ba));
+        byteList = new ArrayList<>();
+      }
+    }
+    if(bracketDiff!=0) {
+      error(2486);
+    }
+    return inputStreamList;
+  }
+
   private JsonParser.Event nextEvent() {
     return jsonParser.next();
   }
@@ -22,14 +53,36 @@ class Rdp {
     return jsonParser.getInt();
   }
   
+  private Variable getVariable(final String name) {
+    final Optional<Variable<? extends Type>> var = context.findVariableByName(name);
+    Variable variable = null;  
+    if(var.isPresent()) {
+      variable = var.get();
+    } else {
+      success = false;
+      variable = new Variable("", null);
+    }
+    return variable;
+  }
+  
   private void error(final Integer n) {
     jsonParser.close();
     throw new RuntimeException("ERROR_" + n.toString() + 
                                " at line " + jsonParser.getLocation().getLineNumber());
   }
     
-  ParsedResult parse(final InputStream inputStream) throws Exception {
-    jsonParser = Json.createParser(inputStream);
+  List<ParsedResult> parse(final InputStream inputStream) throws Exception {
+    final List<ParsedResult> results = new ArrayList<>();
+    for(final InputStream is : splitInput(inputStream)) {
+      success = true;
+      jsonParser = Json.createParser(is); 
+      results.add(parseJson());
+      jsonParser.close();
+    }
+    return results;
+  } 
+  
+  ParsedResult parseJson() throws Exception {
     context = new Context();
     if(nextEvent()==JsonParser.Event.START_OBJECT) {
       if(nextEvent()==JsonParser.Event.KEY_NAME && "con".equals(eventString())) {
@@ -38,8 +91,7 @@ class Rdp {
           inputExp(nextEvent());
           inputTy();
           if(nextEvent()==JsonParser.Event.END_OBJECT) {
-            jsonParser.close();
-            return new ParsedResult(expression, context, type);
+            return new ParsedResult(expression, context, type, success);
           }
           error(9607);
         }
@@ -48,7 +100,7 @@ class Rdp {
       error(5587);
     } 
     error(1235);
-    return null;
+    return ParsedResult.failure;
   }
   
   private void inputTy() {
@@ -59,7 +111,7 @@ class Rdp {
         } else if("Str".equals(eventString())) {
           type = Str.class;
         } else {
-          error(5607);
+          success = false;
         }
         return; 
       }   
@@ -92,7 +144,7 @@ class Rdp {
           }
           final String varname = eventString();
           final Expression r = inputExp(nextEvent());
-          expression = new LetDefinition(l, context.findVariableByName(varname).get(), r);
+          expression = new LetDefinition(l, getVariable(varname), r);
         } else {
           error(2217);
         }
@@ -108,7 +160,7 @@ class Rdp {
         break;
       case VALUE_STRING :
         if("Var".equals(opval)) {
-          expression = context.findVariableByName(eventString()).get();
+          expression = getVariable(eventString());
         } else if("StrLit".equals(opval)) {
           expression = new StringLiteral(new Str(eventString()));
         } else {
@@ -140,8 +192,6 @@ class Rdp {
       }
       error(2388);
     }
-    System.out.println(ne.toString());
-    System.out.println(eventString());
     error(3328);
     return null;
   }
@@ -153,13 +203,12 @@ class Rdp {
         final String varName = eventString();
         ne = nextEvent();
         final String es = eventString();
-        if(ne!=JsonParser.Event.VALUE_STRING || (!"Int".equals(es) && !"Str".equals(es)) ) {
-          error(2220);
-        }
         if("Int".equals(es)) {
           context.add(new Variable<Int>(varName, Int.class));  
-        } else {
+        } else if("Str".equals(es)) {
           context.add(new Variable<Str>(varName, Str.class));
+        } else {
+          success = false;
         }
         ne = nextEvent();
       }
@@ -175,11 +224,15 @@ class Rdp {
     final Context context;
     final Expression expression;
     final Class<? extends Type> type;
+    final boolean success;
     
-    ParsedResult(final Expression a, final Context c, final Class<? extends Type> t) {
+    static final ParsedResult failure = new ParsedResult(null, null, null, false);
+    
+    ParsedResult(final Expression a, final Context c, final Class<? extends Type> t, final boolean s) {
       context = c;
       expression = a;
       type = t;
+      success = s;
     }
     
     Context getContext() {
@@ -193,7 +246,11 @@ class Rdp {
     Expression getExpression() {
       return expression;
     }
+    
+    String success() {
+      return success ? "YES" : "NO";
+    }
   }
 }
-
+  
  

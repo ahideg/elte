@@ -54,7 +54,7 @@
   <target name="test"
       depends="dist">
     <java classname="${prj.classpath.prefix}.Cases"
-        input="${test.dir}/proper_input_2.json">
+        input="${test.dir}/yesyesyes_input.json">
       <classpath>
         <pathelement location="${dist.dir}/${dist.jar}"/>
         <pathelement location="${lib.dir}/javax.json-1.0.4.jar"/>
@@ -63,7 +63,7 @@
   </target> 
   
   <target name="run">
-    <java classname="${prj.classpath.prefix}.Main"
+    <java classname="${prj.classpath.prefix}.MainClass"
         spawn="false">
       <classpath>
         <pathelement location="${dist.dir}/${dist.jar}"/>
@@ -74,7 +74,7 @@
   
   <target name="full"
       depends="dist">
-    <java classname="${prj.classpath.prefix}.Main"
+    <java classname="${prj.classpath.prefix}.MainClass"
         spawn="false">
       <classpath>
         <pathelement location="${dist.dir}/${dist.jar}"/>
