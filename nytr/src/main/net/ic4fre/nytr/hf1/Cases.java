@@ -17,13 +17,6 @@ public class Cases {
     }
   }
   
-  static void caseTypes() {
-    echo("--- caseTypes()");
-        
-    Variable<Int> v = new Variable<>("x", Int.class);
-    echo(v.getKind());
-  }
-  
   static void caseRdp() throws Exception {
     echo("--- caseRdp()");
     

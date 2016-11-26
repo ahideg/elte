@@ -54,7 +54,7 @@
   <target name="test"
       depends="dist">
     <java classname="${prj.classpath.prefix}.Cases"
-        input="${test.dir}/yesyesyes_input.json">
+        input="${test.dir}/proper_input_2.json">
       <classpath>
         <pathelement location="${dist.dir}/${dist.jar}"/>
         <pathelement location="${lib.dir}/javax.json-1.0.4.jar"/>

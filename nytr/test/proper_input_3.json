@@ -1,7 +1,57 @@
 {
 	"con" : {
-		"x" : "Int",
-		"y" : "Int"
+		"x" : "Str"
+	},
+	"exp" : {
+		"op" : "Add",
+      "args" : [{
+          "op" : "Var",
+          "args" : "x"
+        }, {
+          "op" : "IntLit",
+          "args" : 1
+        }
+      ]
+	},
+	"ty" : "Str"
+}
+
+
+{
+	"con" : {
+		"x" : "Str",
+    "y" : "Int"
+	},
+	"exp" : {
+		"op" : "Add",
+		"args" : [{
+				"op" : "IntLit",
+				"args" : 1
+			}, {
+          "op" : "Var",
+          "args" : "z"
+			}
+		]
+	},
+	"ty" : "Str"
+}
+
+
+{
+	"con" : {
+		"x" : "Str"
+	},
+	"exp" : {
+		"op" : "Len",
+		"args" : "x"
+	},
+	"ty" : "Str"
+}
+
+
+{
+	"con" : {
+		"x" : "Int" 
 	},
 	"exp" : {
 		"op" : "Let",
@@ -22,4 +72,83 @@
 		]
 	},
 	"ty" : "Int"
+}
+
+
+{
+	"con" : {
+		"x" : "Int",
+		"y" : "Str"
+	},
+	"exp" : {
+		"op" : "Sub",
+		"args" : [{
+				"op" : "IntLit",
+				"args" : 29
+			}, {
+				"op" : "Var",
+				"args" : "x"
+			}
+		]
+	},
+	"ty" : "Int"
+}
+
+
+{
+	"con" : {
+		"x" : "Str",
+		"y" : "Int"
+	},
+	"exp" : {
+		"op" : "Add",
+		"args" : [{
+				"op" : "Var",
+				"args" : "x"
+			}, {
+				"op" : "Var",
+				"args" : "y"
+			}
+		]
+	},
+	"ty" : "Int"
+}
+
+
+{
+	"con" : {
+		"x" : "Int" 
+	},
+	"exp" : {
+		"op" : "Let",
+		"args" : [{
+				"op" : "Var",
+				"args" : "x"
+			}, "z", {
+				"op" : "Var",
+				"args" : "z"
+			}
+		]
+	},
+	"ty" : "Str"
+}
+
+
+{
+	"con" : {
+		"x" : "Int", 
+		"z" : "Int" 
+	},
+	"exp" : {
+		"op" : "Let",
+		"args" : [{
+				"op" : "Var",
+				"args" : "x"
+			}, "y", {
+				"op" : "Var",
+				"args" : "z"
+			}
+		]
+	},
+	"ty" : "Str"
 }

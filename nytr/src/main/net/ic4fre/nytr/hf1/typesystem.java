@@ -9,164 +9,144 @@ import java.util.Optional;
 
 interface Immutable {}
 
-abstract class Type<J> implements Immutable {
-  private final J representative;
+enum Type {Int, Str, Nil}
+
+abstract class Expression {
+  private final Type type;
   
-  Type(final J r) {
-    representative = r;
+  Expression(final Type t) {
+    type = t;
   }
   
-  J getRepresentative() {
-    return representative;
+  Type getType() {
+    return type;
   }
   
-  @Override 
-  public String toString() {
-    return getRepresentative().toString();
-  }
-}    
-  
-class Int extends Type<Integer> {
-  Int(final Integer i) {
-    super(i);
+  void error(int n) {
+    throw new RuntimeException("TypeErr #" + n);
   }
 }
 
-class Str extends Type<String> {
-  Str(final String s) {
-    super(s);
+abstract class NullaryExpression extends Expression {
+  NullaryExpression(final Type t) {
+    super(t);
   }
 }
 
-abstract class Expression<T extends Type> implements Immutable {
-  T evaluate() {
-    return null;
+abstract class ValueExpression extends NullaryExpression {
+  ValueExpression(final Type t) {
+    super(t);
   }  
 }
 
-abstract class NullaryExpression<T extends Type> extends Expression<T> {}
-
-abstract class ValueExpression<T extends Type> extends NullaryExpression<T> {
-  private final T value;
-
-  ValueExpression(final T v) {
-    value = v;
-  }
-
-  @Override
-  T evaluate() {
-    return value;
-  }
-}
-
-abstract class UnaryExpression<L extends Type, T extends Type> extends NullaryExpression<T> {
+abstract class UnaryExpression extends NullaryExpression {
   private final Expression leftOperand;
 
-  UnaryExpression(final Expression<L> e) {
+  UnaryExpression(final Type t, final Expression e) {
+    super(t);
     leftOperand = e;
   } 
 
-  Expression<L> getLeftOperand() {
+  Expression getLeftOperand() {
     return leftOperand;
   }
   
-  Expression<L> getOperand() {
+  Expression getOperand() {
     return getLeftOperand();
   }    
 }
 
-abstract class BinaryExpression<L extends Type, R extends Type, T extends Type> extends UnaryExpression<L, T> {
-  private final Expression<R> rightOperand;
+abstract class BinaryExpression extends UnaryExpression {
+  private final Expression rightOperand;
   
-  BinaryExpression(final Expression<L> l, final Expression<R> r) {
-    super(l);
+  BinaryExpression(final Type t, final Expression l, final Expression r) {
+    super(t, l);
     rightOperand = r;
   } 
 
-  Expression<R> getRightOperand() {
+  Expression getRightOperand() {
     return rightOperand;
   }  
 }
 
-class Length extends UnaryExpression<Str, Int> {
-  Length(final Expression<Str> e) {
-    super(e);
+class Length extends UnaryExpression {
+  Length(final Expression e) {
+    super(Type.Int, e);
+    if(Type.Str!=e.getType()) {
+      error(2320);
+    }    
   }   
 }
 
-class IntLiteral extends ValueExpression<Int> {
-  IntLiteral(final Int v) {
-    super(v);
+class IntLiteral extends ValueExpression {
+  IntLiteral() {
+    super(Type.Int);
   }  
 }
 
-class StringLiteral extends ValueExpression<Str> {
-  StringLiteral(final Str v) {
-    super(v);
+class StringLiteral extends ValueExpression {
+  StringLiteral() {
+    super(Type.Str);
   }  
 }
 
-class Addition extends BinaryExpression<Int, Int, Int> {
-  Addition(final Expression<Int> l, final Expression<Int> r) {
-    super(l, r);
+class Addition extends BinaryExpression {
+  Addition(final Expression l, final Expression r) {
+    super(Type.Int, l, r);
+    if(Type.Int!=r.getType() || Type.Int!=l.getType()) {
+      error(4432);
+    }     
   }
 }
 
-class Subtraction extends BinaryExpression<Int, Int, Int> {
-  Subtraction(final Expression<Int> l, final Expression<Int> r) {
-    super(l, r);
+class Subtraction extends BinaryExpression {
+  Subtraction(final Expression l, final Expression r) {
+    super(Type.Int, l, r);
+    if(Type.Int!=r.getType() || Type.Int!=l.getType()) {
+      error(6566);
+    }
   }
 }
 
-class Concatenation extends BinaryExpression<Str, Str, Str> {
-  Concatenation(final Expression<Str> l, final Expression<Str> r) {
-    super(l, r);
+class Concatenation extends BinaryExpression {
+  Concatenation(final Expression l, final Expression r) {
+    super(Type.Str, l, r);
+    if(Type.Str!=r.getType() || Type.Str!=l.getType()) {
+      error(198);
+    }
   }
 }
 
-class LetDefinition <L extends Type, R extends Type> extends Expression<L> {
-  private final Expression<R> rightOperand;
-  private final Expression<L> leftOperand;
-  private final Variable<L> boundVariable;
+class LetDefinition extends BinaryExpression { 
+  private final Variable boundVariable;
   
-  LetDefinition(final Expression<L> l, final Variable<L> b, final Expression<R> r) {
-    rightOperand = r;
+  LetDefinition(final Expression l, final Variable b, final Expression r) {
+    super(r.getType(), l, r);
     boundVariable = b;
-    leftOperand = l;
-  }
-  
-  Expression<R> getRightOperand() {
-    return rightOperand;
+    if(b.getType()!=l.getType()) {
+      error(3987);
+    }
   }
 
-  Expression<L> getLeftOperand() {
-    return leftOperand;
-  }
-
-  Variable<L> getBoundVariable() {
+  Variable getBoundVariable() {
     return boundVariable;
   }  
 }
 
-class Variable<T extends Type> extends Expression<T> {  
+class Variable extends NullaryExpression {  
   private final String name;
-  private final Class<T> kind;
   
-  Variable(final String n, final Class<T> k) {
+  Variable(Type t, final String n) {
+    super(t);
     name = n;
-    kind = k;
   }
   
   String getName() {
     return name;
   }
   
-  Class<T> getKind() {   
-    return kind;
-  }
-  
-  Variable<T> klone() {
-    return new Variable<>(getName(), kind);
+  Variable klone() {
+    return new Variable(getType(), getName());
   }
   
   @Override
@@ -176,16 +156,16 @@ class Variable<T extends Type> extends Expression<T> {
   
   @Override
   public String toString() {
-    return "variable " + getName() + "  kind: " + getKind().toString();
+    return "variable " + getName() + "  kind: " + getType().toString();
   }
 }
 
 class Context {
-  private final Set<Variable<? extends Type>> variables = new HashSet<>();
+  private final Set<Variable> variables = new HashSet<>();
   
-  Optional<Variable<? extends Type>> findVariableByName(final String n) {
-    Optional<Variable<? extends Type>> result = Optional.empty();
-    for(final Variable<? extends Type> v : variables) {
+  Optional<Variable> findVariableByName(final String n) {
+    Optional<Variable> result = Optional.empty();
+    for(final Variable v : variables) {
       if(v.getName().equals(n)) {
         result = Optional.of(v.klone());
         break;
@@ -194,17 +174,25 @@ class Context {
     return result;
   }
   
-  boolean add(final Variable<? extends Type> v) {
+  boolean add(final Variable v) {
     if(findVariableByName(v.getName()).isPresent()) {
       throw new RuntimeException("ERROR_8701");
     }
     return variables.add(v);
   }
+    
+  void remove(final String name) {
+    for(final Variable v : variables) {
+      if(v.getName().equals(name)) {
+        variables.remove(v);
+        break;
+      }
+    }
+  }
   
   @Override
   public String toString() {
     return variables.toString();
-  }
+  } 
 }
-
  

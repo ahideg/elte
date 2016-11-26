@@ -1,0 +1,18 @@
+{
+	"con" : {
+		"x" : "Str",
+		"y" : "Int"
+	},
+	"exp" : {
+		"op" : "Add",
+		"args" : [{
+				"op" : "Var",
+				"args" : "x"
+			}, {
+				"op" : "Var",
+				"args" : "y"
+			}
+		]
+	},
+	"ty" : "Int"
+}
