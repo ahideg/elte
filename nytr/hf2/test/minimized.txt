@@ -1,0 +1,37 @@
+{
+	"e1": {
+		"op": "Lam",
+		"args": ["x", {
+				"op": "Var",
+				"args": "x"
+			}
+		]
+	},
+	"e2": {
+		"op": "Lam",
+		"args": ["y", {
+				"op": "Var",
+				"args": "y"
+			}
+		]
+	}
+}
+
+{
+	"e1": {
+		"op": "Lam",
+		"args": ["z", {
+				"op": "Var",
+				"args": "x"
+			}
+		]
+	},
+	"e2": {
+		"op": "Lam",
+		"args": ["y", {
+				"op": "Var",
+				"args": "y"
+			}
+		]
+	}
+}

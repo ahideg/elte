@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
@@ -92,36 +93,17 @@ class Rdp {
         if(!"Suc".equals(opval)) {
           error(9987);
         }
-        try {
-          expression = new DummyExpression(inputExp(ne)); // new Suc(inputExp(nextEvent()))
-        } catch(ExpException e) {
-          expression = failure();
-        }
+        expression = new Suc(inputExp(ne));
         break;
       case START_ARRAY :
         if("App".equals(opval)) {
-          try {
-            expression = new DummyExpression(inputExp(nextEvent()), inputExp(nextEvent()));
-            //expression = new App(inputExp(nextEvent()), inputExp(nextEvent()));
-          } catch(ExpException e) {
-            expression = failure();
-          }
+          expression = new App(inputExp(nextEvent()), inputExp(nextEvent()));
         } else if("Lam".equals(opval)) {
-          try {
-            expression = new DummyExpression(inputVar(), inputExp(nextEvent()));
-            //expression = new Lam(inputVar(), inputExp(nextEvent()));
-          } catch(ExpException e) {
-            expression = failure();
-          }
+          expression = new Lam(new Var(inputVar()), inputExp(nextEvent()));
         } else if("Rec".equals(opval)) {
-          try {
-            expression = new DummyExpression(inputExp(nextEvent()), inputVar(), inputExp(nextEvent()), inputExp(nextEvent()));
-            //expression = new Rec(inputExp(nextEvent()), inputVar(), inputExp(nextEvent()), inputExp(nextEvent())); FIGYELEM, ez rossz, a lambdat javitani!!
-          } catch(ExpException e) {
-            expression = failure();
-          }
+          expression = new Rec(inputExp(nextEvent()), new Fun(new Var(inputVar()), inputExp(nextEvent())), inputExp(nextEvent())); 
         } else if("Zero".equals(opval)) {
-          expression = new DummyExpression(); // new Zero();
+          expression = new Zero();
         } else {
           error(2217);
         }
@@ -131,7 +113,7 @@ class Rdp {
         break;
       case VALUE_STRING :
         if("Var".equals(opval)) {
-          expression = new DummyExpression(); // new Var(eventString());
+          expression = new Var(eventString());
         } else {
           error(5617);
         }
@@ -159,7 +141,9 @@ class Rdp {
         error(4512);
       }
       error(2388);
-    }
+    } 
+    System.out.println(ne);
+    System.out.println(eventString());
     error(3328);
     return null;
   }
@@ -171,7 +155,7 @@ class Rdp {
         if(nextEvent()==JsonParser.Event.KEY_NAME && "e2".equals(eventString())) {
           final Expression e2 = inputExp(nextEvent());
           if(nextEvent()==JsonParser.Event.END_OBJECT) {
-            return success && (e1.equals(e2)) ? YES : NO;
+            return success && e1.equals(e2) ? YES : NO;
           }
           error(9607);
         }
