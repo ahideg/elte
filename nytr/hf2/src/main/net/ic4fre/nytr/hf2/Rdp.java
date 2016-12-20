@@ -157,11 +157,15 @@ class Rdp {
             final Reduction reduction = new Reduction();
             reduction.setUniqueBoundVarNames(e1, new TraversalInfo());
             //System.out.println(e1);
-            final Optional<Expression> r1 = reduction.reduce(e1);
+            Optional<Expression> r1 = reduction.reduce(e1);
+            r1 = reduction.reduce(r1.get());
+            r1 = reduction.reduce(r1.get());
             System.out.println(r1.isPresent() ? r1.get().toString() : "[NIL]");
             reduction.setUniqueBoundVarNames(e2, new TraversalInfo());
             //System.out.println(e2);
-            final Optional<Expression> r2 = reduction.reduce(e2);
+            Optional<Expression> r2 = reduction.reduce(e2);
+            r2 = reduction.reduce(r2.get());
+            r2 = reduction.reduce(r2.get());
             System.out.println(r2.isPresent() ? r2.get().toString() : "[NIL]");
             return YES;
           }

@@ -143,7 +143,7 @@ class Lam extends UnaryExpression {
   
   @Override
   public String toString() {
-    return "{ Lam: [" + super.toString() + ", " + getVar().toString() + "] }";
+    return "{ Lam: [" + getVar().toString() + ", " + super.toString() + "] }";
   }    
 }
 
@@ -154,7 +154,7 @@ class Fun extends Lam {
   
   @Override
   public String toString() {
-    return "{ Fun: [" + super.toString() + ", " + getVar().toString() + "] }";
+    return "{ Fun: }";
   }    
 }
 
