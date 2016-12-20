@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.HashMap;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -124,7 +125,7 @@ class Rdp {
     return expression;    
   }  
   
-  Expression inputExp(final JsonParser.Event ne){
+  private Expression inputExp(final JsonParser.Event ne){
     if(ne==JsonParser.Event.START_OBJECT) {
       if(nextEvent()==JsonParser.Event.KEY_NAME && "op".equals(eventString())) {
         if(nextEvent()==JsonParser.Event.VALUE_STRING) {
@@ -142,8 +143,6 @@ class Rdp {
       }
       error(2388);
     } 
-    System.out.println(ne);
-    System.out.println(eventString());
     error(3328);
     return null;
   }
@@ -155,7 +154,16 @@ class Rdp {
         if(nextEvent()==JsonParser.Event.KEY_NAME && "e2".equals(eventString())) {
           final Expression e2 = inputExp(nextEvent());
           if(nextEvent()==JsonParser.Event.END_OBJECT) {
-            return success && e1.equals(e2) ? YES : NO;
+            final Reduction reduction = new Reduction();
+            reduction.setUniqueBoundVarNames(e1, new TraversalInfo());
+            //System.out.println(e1);
+            final Optional<Expression> r1 = reduction.reduce(e1);
+            System.out.println(r1.isPresent() ? r1.get().toString() : "[NIL]");
+            reduction.setUniqueBoundVarNames(e2, new TraversalInfo());
+            //System.out.println(e2);
+            final Optional<Expression> r2 = reduction.reduce(e2);
+            System.out.println(r2.isPresent() ? r2.get().toString() : "[NIL]");
+            return YES;
           }
           error(9607);
         }

@@ -1,57 +1,19 @@
 package net.ic4fre.nytr.hf2;
 
-import java.util.List;
-import java.util.ArrayList;
-
 class ExpException extends RuntimeException {}
 
-interface Immutable {}
-
-class BindingTable {
-  private final List<String[]> equivalences = new ArrayList<>();
-  
-  void setEquivalence(final String n1, final String n2) {
-    equivalences.add(0, new String[] {n1, n2});
-  }
-  
-  void unsetLastEquivalence() {
-    equivalences.remove(0);
-  }
-  
-  boolean compareVars(final String n1, final String n2) {
-    return ((!equivalences.stream().filter(e -> e[0].equals(n1) || e[1].equals(n2)).findFirst().isPresent()) && n1.equals(n2)) ||
-      equivalences.stream().filter(e -> e[0].equals(n1) && e[1].equals(n2)).findFirst().isPresent();
-  }
-}
-
-abstract class Expression implements Immutable { 
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    return o!=null && getClass().equals(o.getClass());
-  }   
-  
-  @Override
-  public boolean equals(Object o) {
-    return equalz((Expression)o, new BindingTable());
-  }     
-}
+abstract class Expression {}
 
 abstract class LeafExpression extends Expression {}
 
-abstract class NodeExpression extends Expression { 
-  abstract Expression klone(final String varname, final Expression replacement);
-}
+abstract class NodeExpression extends Expression {}
 
 class DummyExpression extends Expression {
   DummyExpression(final Object... exp) {}
-  
-  @Override
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    return true;
-  }  
 }
 
 abstract class UnaryExpression extends NodeExpression {  
-  private final Expression expression;
+  private Expression expression;
   
   UnaryExpression(final Expression e) {
     expression = e;
@@ -63,11 +25,24 @@ abstract class UnaryExpression extends NodeExpression {
   
   Expression getLeftExpression() {
     return getExpression();
-  } 
+  }  
+  
+  void setLeftExpression(final Expression re) {
+    setExpression(re);
+  }   
+    
+  void setExpression(final Expression re) {
+    expression = re;
+  }   
+  
+  @Override
+  public String toString() {
+    return "{ le: " + getLeftExpression() + " }";
+  }
 } 
 
 abstract class BinaryExpression extends UnaryExpression {  
-  private final Expression rightExpression;
+  private Expression rightExpression;
   
   BinaryExpression(final Expression le, final Expression re) {
     super(le);
@@ -76,7 +51,16 @@ abstract class BinaryExpression extends UnaryExpression {
   
   Expression getRightExpression() {
     return rightExpression;
-  }  
+  }   
+  
+  void setRightExpression(final Expression re) {
+    rightExpression = re;
+  } 
+  
+  @Override
+  public String toString() {
+    return "[ " + super.toString() + ", {re: " + getRightExpression().toString() + " } ]";
+  }
 } 
 
 class App extends BinaryExpression {
@@ -85,56 +69,24 @@ class App extends BinaryExpression {
   }
   
   @Override
-  Suc klone(final String varname, final Expression replacement) {
-    if(getLeftExpression() instanceof Var) {
-      return new Suc(replacement);
-    }
-    return new App(e1, e2);
-  } 
-  
-  @Override
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    boolean result = false;
-    if(super.equalz(o, bindingTable)) {
-      final App app = (App)o;
-      result = ( (app.getLeftExpression().equals(getLeftExpression()) && 
-                  app.getRightExpression().equals(getRightExpression())) );
-    }
-    return result;
-  }    
+  public String toString() {
+    return "{ App: " + super.toString() + " }";
+  }
 }
 
-class Suc extends NodeExpression {
-  private final Expression expression;
-  
+class Suc extends UnaryExpression {
   Suc(final Expression e) {
-    expression = e;
-  }
-  
-  Expression getExpression() {
-    return expression;
-  }
+    super(e);
+  }   
   
   @Override
-  Suc klone(final String varname, final Expression replacement) {
-    if(getLeftExpression() instanceof Var && ((Var)getLeftExpression()).getName().equals(varname)) {
-      return new Suc(replacement);
-    }
-    return getExpression().klone(varname, replacement);
-  } 
-  
-  @Override
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    boolean result = false;
-    if(super.equalz(o, bindingTable)) {
-      result = getExpression().equals(((Suc)o).getExpression());
-    }
-    return result;
-  }    
+  public String toString() {
+    return "{ Suc: " + super.toString() + " }";
+  }   
 }
 
 final class Var extends LeafExpression {
-  private final String name;
+  private String name;
   
   Var(final String s) {
     name = s;
@@ -144,14 +96,19 @@ final class Var extends LeafExpression {
     return name;
   }
   
+  void setName(final String n) {
+    name = n;
+  }
+  
   @Override
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    boolean result = false;
-    if(super.equalz(o, bindingTable)) {
-      result = bindingTable.compareVars(getName(), ((Var)o).getName());
-    }
-    return result;
-  }      
+  public boolean equals(Object o) {
+    return o!=null && o instanceof Var && ((Var)o).getName().equals(getName());
+  } 
+  
+  @Override
+  public String toString() {
+    return "{ Var: " + getName() + " }";
+  }   
 }
 
 class Rec extends BinaryExpression {  
@@ -164,19 +121,12 @@ class Rec extends BinaryExpression {
   
   Fun getFun() {
     return fun;
-  }
+  } 
   
   @Override
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    boolean result = false;
-    if(super.equalz(o, bindingTable)) {
-      final Rec rec = (Rec)o;
-      result = getLeftExpression().equalz(rec.getLeftExpression(), bindingTable) && 
-        getRightExpression().equalz(rec.getRightExpression(), bindingTable) &&
-        getFun().equalz(rec.getFun(), bindingTable);
-    }
-    return result;
-  }     
+  public String toString() {
+    return "{ Rec: [" + super.toString() + ", " + getFun().toString() + "] }";
+  }    
 }
 
 class Lam extends UnaryExpression {
@@ -192,15 +142,8 @@ class Lam extends UnaryExpression {
   }
   
   @Override
-  boolean equalz(final Expression o, final BindingTable bindingTable) {
-    boolean result = false;
-    if(super.equalz(o, bindingTable)) {
-      final Lam lam = (Lam)o;
-      bindingTable.setEquivalence(lam.getVar().getName(), getVar().getName());
-      result = getExpression().equalz(lam.getExpression(), bindingTable);
-      bindingTable.unsetLastEquivalence();
-    }
-    return result;
+  public String toString() {
+    return "{ Lam: [" + super.toString() + ", " + getVar().toString() + "] }";
   }    
 }
 
@@ -208,8 +151,16 @@ class Fun extends Lam {
   Fun(final Var v, final Expression e) {
     super(v, e);
   }
+  
+  @Override
+  public String toString() {
+    return "{ Fun: [" + super.toString() + ", " + getVar().toString() + "] }";
+  }    
 }
 
 final class Zero extends LeafExpression {
-  
+  @Override
+  public String toString() {
+    return "[ZERO]";
+  }   
 }
