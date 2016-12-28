@@ -1,0 +1,11 @@
+software:  ant, eclipselink, glassfish, tomee, derby, eclipse
+
+
+copy  ${catalina.home}/lib/catalina-ant.jar  to  ${ant.home}/lib
+
+
+
+
+
+
+

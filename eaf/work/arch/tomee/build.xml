@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<project default="help" name="${prj.name}">
+  <property file="build.properties" />
+
+  <path id="project.class.path">
+    <!--pathelement location="${h2.lib.dir}/h2-1.4.190.jar"/-->
+
+    <fileset dir="${catalina.home}/lib">
+      <include name="**/*.jar"/>
+    </fileset>          
+  </path>    
+
+  <taskdef resource="org/apache/catalina/ant/catalina.tasks"
+      classpathref="compile.classpath"/>
+
+  <target name="help">
+    <echo> 
+      Az Ant task-ek:  
+          clean            clean all
+          clean.dist       cleans the build and dist dirs
+          clean.test       cleans the test dir
+          start-derby      starts derby @ ${derby.home}        
+          stop-derby       stops derby  
+          build            build all         
+          build-war        build the entire .war
+          build-servlet    
+          build-ejbs      
+          build-jpa       
+          build-jdbc       
+          build-jms       
+          build-rmi       
+          servlet-jar      
+          ejbs-jar         
+          jpa-jar                    
+          jdbc-jar                    
+          jms-jar                    
+          rmi-jar                    
+          dist             one .war containing everything
+          unit-tests       perform unit tests
+          web-tests
+          deploy             
+          undeploy           
+          redeploy          
+    </echo>
+  </target>
+
+  <target name="build.clean">
+    <delete dir="${build.dir}"
+        failonerror="false"/>
+    <mkdir dir="${build.dir}"/>
+  </target>    
+
+  <target name="dist.clean">
+    <delete dir="${dist.dir}"
+        failonerror="false"/>
+    <mkdir dir="${dist.dir}"/>
+  </target>   
+
+  <target name="test.clean">
+    <delete dir="${test.dir}"
+        failonerror="false"/>
+    <mkdir dir="${test.dir}"/>
+  </target>      
+
+  <target name="clean"
+        depends="build.clean, dist.clean, test.clean">
+  </target>       
+
+  <target name="build"
+      depends="build.clean">
+    <javac srcdir="${src.dir}/${src.path}"
+        destdir="${build.dir}"
+        includes="*.java"
+        excludes="test/**, others/**"
+        includeantruntime="false">
+      <classpath refid="project.class.path"/>                
+    </javac>
+  </target>    
+
+  <target name="dist"
+      depends="build, dist.clean">              
+    <jar destfile="${dist.dir}/${dist.jar}">
+      <fileset dir="${build.dir}"
+          includes="${src.path}/**"/> 
+    </jar>      
+  </target>   
+  
+
+  <target name="dist-war"
+      depends="build, dist.clean">              
+    <jar destfile="${dist.dir}/${dist.war}">
+      <fileset dir="${web.src.dir}"/> 
+    </jar>      
+  </target>     
+
+  <target name="test"
+      depends="dist">
+    <java classname="tmp.TestCases"
+        fork="true">
+      <classpath refid="project.class.path"/>   
+
+      <classpath>
+        <pathelement location="${dist.dir}/${dist.jar}"/>
+      </classpath>
+    </java>
+  </target>   
+
+  <target name="undeploy">
+    <undeploy url="${tomee.manager.url}"
+        username="${tomee.uname}"
+        password="${tomee.pwd}"
+        path="${webapp.path}"/>
+  </target>  
+  
+  <target name="deploy" 
+      depends="dist">
+    <deploy url="${tomee.manager.url}"
+        username="${tomee.uname}"
+        password="${tomee.pwd}"
+        path="${webapp.path}"
+        localWar="${dist.war}"/>
+  </target>  
+  
+  <target name="redeploy">
+    <antcall target="undeploy"/> 
+    <sleep seconds="2"/>
+    <antcall target="deploy"/> 
+  </target> 
+</project>

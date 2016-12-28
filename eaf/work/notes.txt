@@ -1,0 +1,11 @@
+software:  ant, eclipselink, glassfish, derby, eclipse
+
+C:\apps\glassfish4\glassfish\config\asenv.bat -ba felvenni : 
+
+set JAVA_HOME=C:\apps\jdk8
+set AS_JAVA=%JAVA_HOME%
+
+
+
+
+

@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<project default="help" name="${prj.name}">
+  <property file="build.properties" />
+
+  <path id="project.class.path">
+    <!--pathelement location="${h2.lib.dir}/h2-1.4.190.jar"/-->
+
+    <fileset dir="${glassfish.modules.dir}">
+      <include name="**/*.jar"/>
+    </fileset>          
+  </path>    
+
+
+  <target name="help">
+    <echo> 
+      Ant tasks:  
+        clean             
+        clean.dist        
+        clean.war         
+        clean.war.jar        
+        clean.ear         
+        clean.test        
+        build             
+        build.war         
+        build.war.jar         
+        build.ear             
+        build.webtest        
+        dist              
+        dist.war              
+        dist.war.jar              
+        dist.ear              
+        dist.webtest        
+        test.unit         
+        test.web          
+        deploy             
+        undeploy           
+        redeploy          
+    </echo>
+  </target>    
+
+  <!-- main -->   
+
+  <target name="clean.dist">
+    <delete dir="${dist.dir}"
+        failonerror="false"/>
+    <mkdir dir="${dist.dir}"/>
+  </target>        
+ 
+  <target name="clean"
+      depends="clean.ear, clean.war, clean.war.jar, clean.dist, clean.test">
+  </target>       
+
+  <target name="build"
+      depends="build.war, build.ear">
+  </target>  
+  
+  <target name="dist"
+      depends="clean.dist, dist.war, dist.ear">      
+  </target>   
+
+  <!-- ear -->    
+  
+  <target name="clean.ear">
+    <delete dir="${build.ear.dir}"
+        failonerror="false"/>
+    <mkdir dir="${build.ear.dir}"/>
+  </target>    
+ 
+  <target name="build.ear"
+      depends="clean.ear">
+    <javac srcdir="${java.src.dir}/${src.path}"
+        destdir="${build.ear.dir}" 
+        debug="true"
+        excludes="war/**"
+        includeantruntime="false">
+      <classpath refid="project.class.path"/>                
+    </javac>
+  </target>   
+
+  <target name="dist.ear"
+      depends="build, clean.dist">              
+    <jar destfile="${dist.dir}/${dist.ear}">
+      <fileset dir="${build.ear.dir}"
+          includes="${src.path}/**"/> 
+    </jar>      
+  </target>    
+
+  <!-- war -->
+
+  <target name="clean.war"
+      depends="clean.war.jar">
+    <delete dir="${build.war.dir}"
+        failonerror="false"/>
+    <mkdir dir="${build.war.dir}"/>
+  </target>    
+
+  <target name="clean.war.jar">
+    <delete dir="${build.war.jar.dir}"
+        failonerror="false"/>
+    <mkdir dir="${build.war.jar.dir}"/>
+  </target>  
+  
+  <target name="build.war.jar"
+      depends="clean.war.jar">
+    <javac srcdir="${java.src.dir}/${src.path}/war"
+        destdir="${build.war.jar.dir}"
+        includes="**"
+        debug="true"
+        includeantruntime="false">
+      <classpath refid="project.class.path"/>                
+    </javac>
+  </target>  
+  
+  <target name="build.war"
+      depends="clean.war, dist.war.jar">
+    <copy todir="${build.war.dir}">
+      <fileset dir="${web.src.dir}"/>
+    </copy>
+    
+    <delete dir="${build.war.dir}/WEB-INF/lib"
+        failonerror="false"/>
+        
+    <mkdir dir="${build.war.dir}/WEB-INF/lib"/>    
+    
+    <copy todir="${build.war.dir}/WEB-INF/lib"
+        file="${dist.dir}/${dist.war.jar}"/>    
+  </target>    
+  
+  <target name="dist.war"
+      depends="build.war">              
+    <jar destfile="${dist.dir}/${dist.war}">
+      <fileset dir="${build.war.dir}"/> 
+    </jar>      
+  </target>     
+
+  <target name="dist.war.jar"
+      depends="build.war.jar">              
+    <jar destfile="${dist.dir}/${dist.war.jar}">
+      <fileset dir="${build.war.jar.dir}"/> 
+    </jar>      
+  </target>     
+
+  <!-- test -->  
+  
+  <target name="clean.test">
+    <delete dir="${test.dir}"
+        failonerror="false"/>
+    <mkdir dir="${test.dir}"/>
+  </target>   
+  
+  <target name="test.unit"
+      depends="dist">
+    <java classname="net.eak.test.Cases"
+        fork="true">
+      <classpath refid="project.class.path"/>   
+
+      <classpath>
+        <pathelement location="${dist.dir}/${dist.war}"/>
+        <pathelement location="${dist.dir}/${dist.ear}"/>
+      </classpath>
+    </java>
+  </target>   
+
+  <target name="test.web"
+      depends="deploy">
+  </target> 
+  
+  <!-- deploy -->    
+  
+  <target name="undeploy">
+    <exec executable="${glassfish.asadmin}"
+        failonerror="true">
+      <arg line=" undeploy "/>
+    </exec>
+  </target>  
+  
+  <target name="deploy" 
+      depends="dist">
+    <exec executable="${glassfish.asadmin}"
+        failonerror="true">
+      <arg line=" deploy "/>
+    </exec>
+  </target>  
+  
+  <target name="redeploy">
+    <antcall target="undeploy"/> 
+    <sleep seconds="2"/>
+    <antcall target="deploy"/> 
+  </target> 
+</project>
