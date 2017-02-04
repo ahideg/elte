@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" 
+        DefaultTargets="Help"  
+        xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="Properties.xml"/>
+    <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\4.0\Framework\v4.0\Microsoft.FSharp.Targets"/> 
+
+    <Target Name="Help">
+        <Message Text="Help text" />
+    </Target>
+
+    <Target Name="CleanBuild">
+        <RemoveDir Directories="$(BuildDir)"/>
+        <MakeDir Directories="$(BuildDir)"/>
+    </Target>
+
+    <Target Name="CleanDist">
+        <Delete Files="$(DistDir)"/>
+    </Target>
+
+    <Target Name="CleanTest">
+    </Target>    
+    
+    <Target Name="CleanAll"
+            DependsOnTargets="CleanBuild;CleanDist;CleanTest">
+    </Target>
+    
+    <Target Name="Build"
+            DependsOnTargets="CleanAll">
+        <Fsc Sources="src\test\hello.fs"
+                Platform="x86"
+                OutputAssembly="$(Outfile)">
+        </Fsc>
+    </Target>
+</Project>
